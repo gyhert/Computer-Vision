@@ -1,0 +1,78 @@
+k－means by java
+＃//initial cluster center point
+Random random = new Random();  
+for (int i = 0; i < numOfCluster; i++)  
+{  
+    int randomNumber1 = random.nextInt(width);  
+    int randomNumber2 = random.nextInt(height);  
+    index = randomNumber2 * width + randomNumber1;  
+    ClusterCenter cc = new ClusterCenter(randomNumber1, randomNumber2, inPixels[index]);  
+    cc.setcIndex(i);  
+    clusterCenterList.add(cc);   
+}  
+
+// create all cluster point  
+for (int row = 0; row < height; ++row)  
+{  
+    for (int col = 0; col < width; ++col)  
+    {  
+        index = row * width + col;  
+        int color = inPixels[index];  
+        pointList.add(new ClusterPoint(row, col, color));  
+  
+    }  
+}  
+//computation
+// int pa = (p.getPixelColor() >> 24) & 0xff;  
+int pr = (p.getPixelColor() >> 16) & 0xff;  
+int pg = (p.getPixelColor() >> 8) & 0xff;  
+int pb = p.getPixelColor() & 0xff;  
+// int ca = (c.getPixelColor() >> 24) & 0xff;  
+int cr = (c.getPixelColor() >> 16) & 0xff;  
+int cg = (c.getPixelColor() >> 8) & 0xff;  
+int cb = c.getPixelColor() & 0xff;  
+  
+return Math.sqrt(Math.pow((pr - cr), 2.0) + Math.pow((pg - cg), 2.0) + Math.pow((pb - cb), 2.0));  
+//recomputate center
+private double[] reCalculateClusterCenters() {  
+      
+    // clear the points now  
+    for(int i=0; i<clusterCenterList.size(); i++)  
+    {  
+         clusterCenterList.get(i).setNumOfPoints(0);  
+    }  
+      
+    // recalculate the sum and total of points for each cluster  
+    double[] redSums = new double[3];  
+    double[] greenSum = new double[3];  
+    double[] blueSum = new double[3];  
+    for(int i=0; i<pointList.size(); i++)  
+    {  
+        int cIndex = (int)pointList.get(i).getClusterIndex();  
+        clusterCenterList.get(cIndex).addPoints();  
+        int ta = (pointList.get(i).getPixelColor() >> 24) & 0xff;  
+        int tr = (pointList.get(i).getPixelColor() >> 16) & 0xff;  
+        int tg = (pointList.get(i).getPixelColor() >> 8) & 0xff;  
+        int tb = pointList.get(i).getPixelColor() & 0xff;  
+        ta = 255;  
+        redSums[cIndex] += tr;  
+        greenSum[cIndex] += tg;  
+        blueSum[cIndex] += tb;  
+    }  
+      
+    double[] oldClusterCentersColors = new double[clusterCenterList.size()];  
+    for(int i=0; i<clusterCenterList.size(); i++)  
+    {  
+        double sum  = clusterCenterList.get(i).getNumOfPoints();  
+        int cIndex = clusterCenterList.get(i).getcIndex();  
+        int red = (int)(greenSum[cIndex]/sum);  
+        int green = (int)(greenSum[cIndex]/sum);  
+        int blue = (int)(blueSum[cIndex]/sum);  
+        System.out.println("red = " + red + " green = " + green + " blue = " + blue);  
+        int clusterColor = (255 << 24) | (red << 16) | (green << 8) | blue;  
+        clusterCenterList.get(i).setPixelColor(clusterColor);  
+        oldClusterCentersColors[i] = clusterColor;  
+    }  
+      
+    return oldClusterCentersColors;  
+}  
